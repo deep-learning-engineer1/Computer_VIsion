@@ -1,6 +1,3 @@
-
-
-
 import cv2
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -9,8 +6,6 @@ import os
 import numpy as np
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.applications.vgg16 import preprocess_input
-
-
 
 class Computer_Vision: # Here we need to build interface and switch on camera in this class.
     def __init__(self):
@@ -28,7 +23,6 @@ class Computer_Vision: # Here we need to build interface and switch on camera in
         
     def start_camera(self): # i have bug, when this function works, you can close it just when you close whole program, i could use asyncio function so it works together, and i can close it.
         self.camera = cv2.VideoCapture(0)
-        print("Camera opened succesfully.")
         while self.open:
             self.ret, self.frame = self.camera.read()
             self.frame = np.array(self.frame)
@@ -41,14 +35,11 @@ class Computer_Vision: # Here we need to build interface and switch on camera in
         self.camera.release()
         print("Camera stopped successfully.")
             
-
-
-
 class Model:
     def __init__(self):
         try:
             address_of_saved_model = "/Users/hliblukianov/Documents/computer_vision_model.keras"
-            tf.keras.models.load_model(address_of_saved_model)
+            self.model = tf.keras.models.load_model(address_of_saved_model)
             print("Model is found.")
         except:
             self.model = tf.keras.models.Sequential([
@@ -59,10 +50,14 @@ class Model:
                 
                tf.keras.layers.Flatten(),
                tf.keras.layers.Dense(6, activation = 'relu'),
+               tf.keras.layers.BatchNormalization(),
                tf.keras.layers.Dense(12, activation = 'relu'),
                tf.keras.layers.Dense(7, activation = 'relu'),
                tf.keras.layers.Dense(8, activation = 'tanh')
             ]) 
+            self.CV_model = tf.keras.Model(inputs=self.model,
+                                          outputs=[self.model, coordinates_output])
+            
             print("Building new model from scratch.")
         finally:
             print("Initialization completed succesfully")
@@ -95,7 +90,7 @@ class Model:
     def train_model(self, train_dataset, test_dataset, validation_dataset): 
         print("Model kernel started")
         self.model.compile(optimizer = "nadam", loss = "sparse_categorical_crossentropy", metrics = ["accuracy"])
-        self.model.fit(train_dataset, validation_data = test_dataset, epochs=1, batch_size=12)
+        self.model.fit(train_dataset, validation_data = test_dataset, epochs=14, batch_size=12)
         self.model.evaluate(validation_dataset)
         self.model.summary()
         self.model.save('/Users/hliblukianov/Documents/computer_vision_model.keras')
@@ -103,36 +98,35 @@ class Model:
     def predict_photo(self, frame):
         prediction = self.model.predict(frame)
         print(prediction)
-        if prediction.any() == 1:
+        if prediction.any(6) > 0.5:
             print("cucumber")
-        elif prediction == 0:
-            print("tomato")
-        elif prediction == 0.3:
-            print("egg")
-        elif prediction == 0.2:
+        elif prediction.any(3) > 0.5:
+            print("blueberry")
+        elif prediction.any(8) > 0.5:
+            print("strawberry")
+        elif prediction.any(2) > 0.5:
             print("banana")
-        elif prediction == 0.4:
+        elif prediction.any(1) > 0.5:
             print("avocado")
-        elif prediction == 0.5:
+        elif prediction.any(7) > 0.5:
             print("nut")
-        elif prediction == 0.6:
+        elif prediction.any(5) > 0.5:
             print("cookie")
-        elif prediction == 0.7:
+        elif prediction.any(4) > 0.5:
             print("bread")
         else:
             print("Not recognised")
-
 
 model = Model()
 
 
 model.prepare_data()
 
+
 model.train_model(model.dataset, model.test_dataset, model.validation_dataset)
 
-cv.stop_camera() # For closing camera
-
 cv = Computer_Vision()
+print("Camera opened succesfully.")
 while True:
     photo = cv.start_camera()
     photo = img_to_array(photo)
@@ -140,3 +134,5 @@ while True:
     photo = photo.reshape((1, photo.shape[0], photo.shape[1], photo.shape[2]))
     photo = tf.image.rgb_to_grayscale(photo)
     model.predict_photo(photo)
+    
+cv.stop_camera() # For closing camera
