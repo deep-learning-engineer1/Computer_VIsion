@@ -33,28 +33,27 @@ class Computer_Vision: # Here we need to build interface and switch on camera in
         except:
             print("Camera can't be stopped.")
         
-    def predict_bounding_box(self, frame, x_left, x_right, y_left, y_right, color, length):
-        self.rectangle(frame, (x_left, y_left), (x_right, y_right), color, length)
+    def predict_bounding_box(self, frame, x_left, y_left, color, length):
+        self.rectangle(frame, (x_left, y_left), color, length)
         
 class Model:
     def __init__(self):
+        weight = 32
+        height = 32
         try:
             address_of_saved_model = "/Users/hliblukianov/Documents/computer_vision_model.keras"
             self.model = tf.keras.models.load_model(address_of_saved_model)
             print("Model is found.")
         except:
             self.model = tf.keras.models.Sequential([
-               tf.keras.layers.ResizingLayer(width , height)
-               tf.keras.layers.Conv2D(3, 3),
-               tf.keras.layers.MaxPooling2D(32, 32),
-               tf.keras.layers.Conv2D(3, 3),
-               tf.keras.layers.MaxPooling2D(8, 8),
-                
-               tf.keras.layers.Flatten(),
-               tf.keras.layers.Dense(6, activation = 'relu'),
-               tf.keras.layers.BatchNormalization(),
-               tf.keras.layers.Dense(12, activation = 'relu'),
-               tf.keras.layers.Dense(7, activation = 'relu'),
+               tf.keras.layers.ResizingLayer(width , height),
+               tf.keras.layers.Conv2D(filters = 6, size = (28, 28), kernel_size = (5, 5), stride = 1, activation = 'tanh'),
+               tf.keras.layers.GlobalAveragePooling2D(filters = 6, size = (28, 28), kernel_size = (2, 2), stride = 2, activation = 'tanh'),
+               tf.keras.layers.Conv2D(filters = 16, size = (10, 10), kernel_size = (5, 5), stride = 1, activation = 'tanh'),
+               tf.keras.layers.GlobalAveragePooling2D(filters = 16, size = (5, 5), kernel_size = (2, 2), stride = 2, activation = 'tanh'),
+               tf.keras.layers.Conv2D(filters = 120, size = (1, 1), kernel_size = (5, 5), stride = 1, activation = 'tanh'),
+               tf.keras.layers.Dense(size = 84, activation = 'tanh'),
+               tf.keras.layers.Dense(size = 10, activation = 'RBF') 
                
             ]) 
             average_layer = tf.keras.layers.GlobalAveragePooling2D()(self.model)
@@ -101,9 +100,7 @@ class Model:
         self.model.save('/Users/hliblukianov/Documents/computer_vision_model.keras')
         
     def predict_photo(self, frame):
-        
         prediction = self.model.predict(frame)
-        print(prediction)
 
 model = Model()
 
@@ -120,14 +117,5 @@ while True:
     photo = photo.reshape((1, photo.shape[0], photo.shape[1], photo.shape[2]))
     photo = tf.image.rgb_to_grayscale(photo)
     model.predict_photo(photo)
-
-print(model.model.predict(model.dataset[0][0]))
-print(model.model.predict(model.dataset[1][0]))
-print(model.model.predict(model.dataset[2][0]))
-print(model.model.predict(model.dataset[3][0]))
-print(model.model.predict(model.dataset[4][0]))
-print(model.model.predict(model.dataset[5][0]))
-print(model.model.predict(model.dataset[6][0]))
-print(model.model.predict(model.dataset[7][0]))
 
 cv.stop_camera()
