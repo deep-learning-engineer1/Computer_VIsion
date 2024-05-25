@@ -35,10 +35,10 @@ class Computer_Vision: # Here we need to build interface and switch on camera in
         
     def predict_bounding_box(self, frame, x_left, y_left, color, length):
         self.rectangle(frame, (x_left, y_left), color, length)
-        
+
 class Model:
     def __init__(self):
-        weight = 32
+        width = 32
         height = 32
         try:
             address_of_saved_model = "/Users/hliblukianov/Documents/computer_vision_model.keras"
@@ -46,14 +46,15 @@ class Model:
             print("Model is found.")
         except:
             self.model = tf.keras.models.Sequential([
-               tf.keras.layers.ResizingLayer(width , height),
-               tf.keras.layers.Conv2D(filters = 6, size = (28, 28), kernel_size = (5, 5), stride = 1, activation = 'tanh'),
-               tf.keras.layers.GlobalAveragePooling2D(filters = 6, size = (28, 28), kernel_size = (2, 2), stride = 2, activation = 'tanh'),
-               tf.keras.layers.Conv2D(filters = 16, size = (10, 10), kernel_size = (5, 5), stride = 1, activation = 'tanh'),
-               tf.keras.layers.GlobalAveragePooling2D(filters = 16, size = (5, 5), kernel_size = (2, 2), stride = 2, activation = 'tanh'),
-               tf.keras.layers.Conv2D(filters = 120, size = (1, 1), kernel_size = (5, 5), stride = 1, activation = 'tanh'),
-               tf.keras.layers.Dense(size = 84, activation = 'tanh'),
-               tf.keras.layers.Dense(size = 10, activation = 'RBF') 
+               tf.keras.layers.Resizing(width , height),
+               tf.keras.layers.Flatten(),
+               tf.keras.layers.Conv2D(filters = 6, size = (28, 28), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
+               tf.keras.layers.GlobalAveragePooling2D(filters = 6, size = (28, 28), kernel_size = (2, 2), strides = 2, activation = 'tanh'),
+               tf.keras.layers.Conv2D(filters = 16, size = (10, 10), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
+               tf.keras.layers.GlobalAveragePooling2D(filters = 16, size = (5, 5), kernel_size = (2, 2), strides = 2, activation = 'tanh'),
+               tf.keras.layers.Conv2D(filters = 120, size = (1, 1), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
+               tf.keras.layers.Dense(84, activation = 'tanh'),
+               tf.keras.layers.Dense(10, activation = 'RBF') 
                
             ]) 
             average_layer = tf.keras.layers.GlobalAveragePooling2D()(self.model)
@@ -93,11 +94,18 @@ class Model:
         
     def train_model(self, train_dataset, test_dataset, validation_dataset): 
         print("Model kernel started")
-        self.model.compile(optimizer = "nadam", loss = "sparse_categorical_crossentropy", metrics = ["accuracy"])
-        self.model.fit(train_dataset, validation_data = test_dataset, epochs=14, batch_size=12)
-        self.model.evaluate(validation_dataset)
-        self.model.summary()
-        self.model.save('/Users/hliblukianov/Documents/computer_vision_model.keras')
+        try: 
+            print("With area detection one")
+            self.CV_model.self.model.compile(optimizer = "nadam", loss = "sparse_categorical_crossentropy", metrics = ["accuracy"])
+            self.CV_model.fit(train_dataset, validation_data = test_dataset, epochs=14, batch_size=12)
+            self.CV_model.save('/Users/hliblukianov/Documents/computer_vision_model.keras')
+        except:
+            print("Normal one")
+            self.model.compile(optimizer = "nadam", loss = "sparse_categorical_crossentropy", metrics = ["accuracy"])
+            self.model.fit(train_dataset, validation_data = test_dataset, epochs=14, batch_size=12)
+            self.model.evaluate(validation_dataset)
+            self.model.summary()
+            self.model.save('/Users/hliblukianov/Documents/computer_vision_model.keras')
         
     def predict_photo(self, frame):
         prediction = self.model.predict(frame)
@@ -117,5 +125,5 @@ while True:
     photo = photo.reshape((1, photo.shape[0], photo.shape[1], photo.shape[2]))
     photo = tf.image.rgb_to_grayscale(photo)
     model.predict_photo(photo)
-
 cv.stop_camera()
+
