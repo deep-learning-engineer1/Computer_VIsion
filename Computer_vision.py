@@ -1,4 +1,3 @@
-
 import cv2
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -47,14 +46,13 @@ class Model:
         except:
             self.model = tf.keras.models.Sequential([
                tf.keras.layers.Resizing(width , height),
-               tf.keras.layers.Flatten(),
-               tf.keras.layers.Conv2D(filters = 6, size = (28, 28), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
-               tf.keras.layers.GlobalAveragePooling2D(filters = 6, size = (28, 28), kernel_size = (2, 2), strides = 2, activation = 'tanh'),
-               tf.keras.layers.Conv2D(filters = 16, size = (10, 10), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
-               tf.keras.layers.GlobalAveragePooling2D(filters = 16, size = (5, 5), kernel_size = (2, 2), strides = 2, activation = 'tanh'),
-               tf.keras.layers.Conv2D(filters = 120, size = (1, 1), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
+               tf.keras.layers.Conv2D(filters = 6, input_shape= (28, 28), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
+               tf.keras.layers.GlobalAveragePooling2D(),
+               tf.keras.layers.Conv2D(filters = 16, input_shape = (10, 10), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
+               tf.keras.layers.GlobalAveragePooling2D(),
+               tf.keras.layers.Conv2D(filters = 120, input_shape = (1, 1), kernel_size = (5, 5), strides = 1, activation = 'tanh'),
                tf.keras.layers.Dense(84, activation = 'tanh'),
-               tf.keras.layers.Dense(10, activation = 'RBF') 
+               tf.keras.layers.Dense(10, activation = rbf) 
                
             ]) 
             average_layer = tf.keras.layers.GlobalAveragePooling2D()(self.model)
@@ -66,6 +64,8 @@ class Model:
             print("Building new model from scratch.")
         finally:
             print("Initialization completed succesfully")
+    def rbf(): # activation function RBF
+        pass
     def prepare_data(self): 
         print("Preparing data.")
         self.input_shape = (1280, 721)
@@ -113,7 +113,6 @@ class Model:
 model = Model()
 
 model.prepare_data()
-
 model.train_model(model.dataset, model.test_dataset, model.validation_dataset)
 
 cv = Computer_Vision()
@@ -127,3 +126,4 @@ while True:
     model.predict_photo(photo)
 cv.stop_camera()
 
+            
