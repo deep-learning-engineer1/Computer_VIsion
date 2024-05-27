@@ -117,15 +117,15 @@ model.train_model(model.dataset, model.test_dataset, model.validation_dataset)
 
 cv = Computer_Vision()
 
-def start_machine():
-    print("Camera opened succesfully.")
-    while True:
-        photo = cv.start_camera()
-        photo = img_to_array(photo)
-        photo = preprocess_input(photo)
-        photo = photo.reshape((1, photo.shape[0], photo.shape[1], photo.shape[2]))
-        photo = tf.image.rgb_to_grayscale(photo)
-        model.predict_photo(photo)
-    cv.stop_camera()
+
+print("Camera opened succesfully.")
+while True:
+    photo = cv.start_camera()
+    photo = img_to_array(photo)
+    photo = preprocess_input(photo)
+    photo = photo.reshape((1, photo.shape[0], photo.shape[1], photo.shape[2]))
+    photo = tf.image.rgb_to_grayscale(photo)
+    model.predict_photo(photo)
+cv.stop_camera()
 
 
