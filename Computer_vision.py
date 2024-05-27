@@ -6,7 +6,6 @@ import os
 import numpy as np
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.applications.vgg16 import preprocess_input
-
 class Computer_Vision: # Here we need to build interface and switch on camera in this class.
     def __init__(self):
         self.open = True
@@ -60,12 +59,13 @@ class Model:
             coordinates_output = tf.keras.layers.Dense(5)(average_layer)
             self.CV_model = tf.keras.Model(inputs=self.model.input,
                                           outputs=[class_output_layer, coordinates_output])
-            
             print("Building new model from scratch.")
         finally:
             print("Initialization completed succesfully")
-    def rbf(): # activation function RBF
+            
+    def rbf(z): # activation function RBF
         pass
+        
     def prepare_data(self): 
         print("Preparing data.")
         self.input_shape = (1280, 721)
@@ -116,14 +116,16 @@ model.prepare_data()
 model.train_model(model.dataset, model.test_dataset, model.validation_dataset)
 
 cv = Computer_Vision()
-print("Camera opened succesfully.")
-while True:
-    photo = cv.start_camera()
-    photo = img_to_array(photo)
-    photo = preprocess_input(photo)
-    photo = photo.reshape((1, photo.shape[0], photo.shape[1], photo.shape[2]))
-    photo = tf.image.rgb_to_grayscale(photo)
-    model.predict_photo(photo)
-cv.stop_camera()
 
-            
+def start_machine():
+    print("Camera opened succesfully.")
+    while True:
+        photo = cv.start_camera()
+        photo = img_to_array(photo)
+        photo = preprocess_input(photo)
+        photo = photo.reshape((1, photo.shape[0], photo.shape[1], photo.shape[2]))
+        photo = tf.image.rgb_to_grayscale(photo)
+        model.predict_photo(photo)
+    cv.stop_camera()
+
+
